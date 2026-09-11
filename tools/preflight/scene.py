@@ -49,6 +49,8 @@ def main():
         import omni.replicator.core as rep
         from omni.kit.viewport.utility import get_active_viewport
 
+        # 카메라 초기화 속도와 저장된 설정에 의존하지 않고 검사 시점에 직접 촬영합니다.
+        rep.orchestrator.set_capture_on_play(False)
         world = World(physics_dt=1/60, rendering_dt=1/60, stage_units_in_meters=1.0)
         stage = omni.usd.get_context().get_stage()
         world.scene.add(FixedCuboid('/World/Ground', name='ground',
@@ -71,14 +73,17 @@ def main():
         rgb_reader.attach([product.path])
         get_active_viewport().set_active_camera('/World/TestCamera')
         initial_z = float(cube.get_world_pose()[0][2])
-        for frame in range(600):
+        for _ in range(180):
             world.step(render=True)
-            rgba = np.asarray(rgb_reader.get_data())
-            if frame >= 179 and rgba.shape == (480, 640, 4):
-                break
         final_z = float(cube.get_world_pose()[0][2])
         if not initial_z > .8 or not .07 < final_z < .14:
             raise RuntimeError(f'큐브 낙하·바닥 충돌 검사 실패: z={initial_z} → {final_z} m')
+        print(f'LEKIWI_PREFLIGHT physics=PASS initial_z={initial_z} final_z={final_z}', flush=True)
+        # step은 Replicator 그래프를 준비하고 촬영 완료를 기다립니다.
+        # 물리 시간은 그대로 유지해 낙하 검사 직후의 장면을 읽습니다.
+        print('LEKIWI_PREFLIGHT camera=CAPTURING', flush=True)
+        rep.orchestrator.step(rt_subframes=4, delta_time=0.0, pause_timeline=False)
+        rgba = np.asarray(rgb_reader.get_data())
         if rgba.shape != (480, 640, 4) or not np.isfinite(rgba).all():
             raise RuntimeError(f'카메라 이미지 크기/수치 오류: {rgba.shape}')
         rgb = rgba[:, :, :3].astype(np.uint8)

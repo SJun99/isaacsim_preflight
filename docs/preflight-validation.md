@@ -43,9 +43,20 @@
 Python·Bash 구문, README 상대 링크와 diff 검사도 통과했습니다.
 
 2026-09-11 공개 저장소 분리 후 관련 검사 71개를 다시 통과했습니다.
-설치기·점검 장면·영상 연결·Docker 구성 파일이 원본과 동일함을 확인했고, 독립 실행 메뉴와 문서 링크를 검사했습니다.
+분리 당시 설치기·점검 장면·영상 연결·Docker 구성 파일이 원본과 동일함을 확인했고, 독립 실행 메뉴와 문서 링크를 검사했습니다.
 개발 PC에서 분리된 패키지의 읽기 전용 `preflight check`도 PASS를 확인했습니다.
 개발 PC에 설치된 ROS용 pytest 플러그인과의 충돌을 피하려고 테스트에는 `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`을 사용합니다.
+
+## 2026-09-11 빈 카메라 프레임 검사 수정
+
+- 학생 RTX 5070 Ti의 로그에서 앱 초기화 완료 후 약 2초 만에 `(0,)` 크기의 빈 이미지로 실패한 것을 확인했습니다. 해당 PC의 정확한 내부 상태는 아직 확인되지 않았습니다.
+- 개발 RTX 5060 Laptop에서 카메라 자동 생성을 끈 조건으로 같은 빈 이미지 오류를 재현했습니다. 원본은 물리·렌더 반복만 수행해 카메라 데이터 준비에 의존했습니다.
+- 물리 낙하 검사 후 `rep.orchestrator.step(rt_subframes=4, delta_time=0.0, pause_timeline=False)`으로 촬영을 요청하고 완료 후 픽셀을 읽도록 수정했습니다. 물리 시간은 촬영 중 증가시키지 않습니다.
+- 수정본은 자동 생성을 끈 상태에서도 실제 GPU 검사 PASS: 최종 큐브 높이 약 0.1m, 640×480 이미지, 공간 표준편차 약 40.2. 생성된 이미지에서 바닥과 큐브도 확인했습니다.
+- 배포 이미지를 다시 빌드한 뒤 `preflight serve`에서도 물리·카메라 PASS와 `scene=READY`를 확인했습니다. 이번 수정 검증에서 노트북 클라이언트의 영상 수신을 다시 측정한 것은 아닙니다.
+- 기존 오류·이미지·설치기 관련 자동 검사 71개를 다시 통과했습니다. 5070 Ti에서 수정본 재검사는 아직 필요합니다.
+
+공식 API 근거: [시뮬레이션 특정 시점의 카메라 데이터 읽기](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/replicator_tutorials/tutorial_replicator_isaac_snippets.html#synthetic-data-access-at-specific-simulation-timepoints).
 
 새 PC의 드라이버 실제 교체·Secure Boot 등록·재부팅은 이번 검증에서 수행하지 않았습니다.
 학교망의 기기 간 통신 허용, 실제 학생 노트북의 화면 수신과 조작, 여러 학생 동시 접속은 현장에서 확인해야 합니다.

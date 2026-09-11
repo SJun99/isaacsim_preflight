@@ -45,6 +45,17 @@ export ACCEPT_EULA=Y
 **완료 기준: `LEKIWI_PREFLIGHT result=PASS report=.../result.json`이 나옵니다.**
 이미 설치했다면 재설치 없이 `./lekiwi preflight verify`로 다시 검사할 수 있습니다.
 
+검사 코드가 업데이트됐다면 **이 공개 저장소를 받은 폴더**에서 다음을 실행합니다.
+`verify`는 이미 빌드된 이미지를 사용하므로 코드 갱신 후에는 `build`가 필요합니다.
+기존 공식 Isaac Sim 이미지 레이어는 재사용하며 드라이버를 다시 설치하지 않습니다.
+
+```bash
+git pull --ff-only origin develop
+export ACCEPT_EULA=Y
+./lekiwi preflight build
+./lekiwi preflight verify
+```
+
 ## 3. 데스크탑에서 화면 송출 시작
 
 데스크탑의 실제 LAN IP를 확인합니다. 아래 `192.168.0.171`은 예시입니다.
@@ -121,6 +132,7 @@ Stop → Play로 같은 실험을 다시 할 수 있는지도 확인합니다. T
 | 재부팅 필요 안내 | 작업 저장 → 재부팅 → 2단계 두 줄 재실행 |
 | sudo 비밀번호 입력 중 글자가 안 보임 | 정상 동작. 해당 PC 사용자 비밀번호를 입력하고 Enter |
 | `image inspect` 실패 | 2단계 설치가 끝났는지 확인. `verify`와 `serve`는 자동 설치하지 않음 |
+| `카메라 이미지 크기/수치 오류: (0,)` | 영상 픽셀이 비어 있음. 2단계의 코드 갱신·이미지 재빌드 후 다시 검사. 반복되면 `sim.log` 전달 |
 | 앱 준비가 오래 걸림 | 표시된 `sim.log` 확인. 실행을 중복으로 시작하지 않음 |
 | `Killed` / 프로세스 강제 종료 | `free -h`로 RAM·스왑 여유 확인. 불필요한 앱·기존 Isaac Sim을 정상 종료하고 다시 검사. 운영체제 로그의 메모리 부족 여부 확인 |
 | 서버 `READY`인데 노트북 화면이 안 나옴 | 서버 IP, 클라이언트 버전, 학교망·방화벽의 TCP 49100 / UDP 47998 통신 확인 |
@@ -147,4 +159,5 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests
 ```
 
 원본 `lekiwi_isaacsim`의 `test` 커밋 `683c7f9db74291064739b932218f800a4d0f8b89`에서 사전 점검에 필요한 파일을 분리했습니다.
-설치기·점검 장면·영상 실행 코드는 유지하고, 실행 메뉴와 문서를 공개 배포 범위에 맞췄습니다.
+설치기·점검 장면·영상 실행 코드를 가져오고, 실행 메뉴와 문서를 공개 배포 범위에 맞췄습니다.
+공개 배포 후 카메라 검사는 촬영 완료를 명시적으로 기다리도록 수정했습니다.
