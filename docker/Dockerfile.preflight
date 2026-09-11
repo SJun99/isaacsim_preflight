@@ -1,0 +1,9 @@
+FROM nvcr.io/nvidia/isaac-sim:5.1.0
+USER root
+WORKDIR /opt/preflight
+# 교재·로봇·학습 패키지 없이 공식 이미지의 Python과 USD를 사용합니다.
+COPY tools/preflight/scene.py /opt/preflight/scene.py
+COPY isaac_sim/app_runtime.py /opt/preflight/app_runtime.py
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+USER 1234:1234
+ENTRYPOINT ["/isaac-sim/python.sh", "/opt/preflight/scene.py"]

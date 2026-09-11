@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# 공개 사전 점검 패키지는 Ubuntu 기본 Python으로 실행합니다.
+set -euo pipefail
+
+readonly project_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+export LEKIWI_UID="$(id -u)" LEKIWI_GID="$(id -g)"
+export LEKIWI_DATA_DIR="${LEKIWI_DATA_DIR:-${project_dir}/data}"
+
+command_name="${1:-help}"
+if (($#)); then shift; fi
+case "$command_name" in
+    preflight)
+        exec /usr/bin/python3 -B -u "$project_dir/tools/preflight/main.py" "$@"
+        ;;
+    help|-h|--help)
+        echo '사용법: ./lekiwi preflight COMMAND [ARGS]'
+        echo '  check    설치 없이 데스크탑 환경 확인'
+        echo '  install  드라이버·Docker 준비 후 Isaac Sim 실행 검사'
+        echo '  build    사전 점검 이미지 빌드'
+        echo '  verify   설치 없이 기존 이미지로 실행 검사'
+        echo '  serve    점검 화면 송출 (--host 데스크탑_IP)'
+        echo '  client   학생 노트북에서 화면 클라이언트 실행'
+        echo '  report   최근 검사 결과 확인'
+        ;;
+    *)
+        echo '이 저장소는 사전 점검용입니다. ./lekiwi preflight --help를 확인하세요.' >&2
+        exit 2
+        ;;
+esac

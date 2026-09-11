@@ -1,0 +1,8 @@
+**
+!docker/
+!docker/Dockerfile.preflight
+!tools/
+!tools/preflight/
+!tools/preflight/scene.py
+!isaac_sim/
+!isaac_sim/app_runtime.py

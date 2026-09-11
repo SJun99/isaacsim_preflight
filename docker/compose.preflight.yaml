@@ -1,0 +1,36 @@
+services:
+  sim:
+    image: lekiwi-preflight:5.1.0
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.preflight
+    platform: linux/amd64
+    user: "${LEKIWI_UID:?}:${LEKIWI_GID:?}"
+    group_add: ["1234"]
+    init: true
+    gpus: all
+    shm_size: 2gb
+    network_mode: host
+    environment:
+      ACCEPT_EULA: ${ACCEPT_EULA:-N}
+      HOME: /data/home
+      XDG_CACHE_HOME: /data/cache
+      NVIDIA_DRIVER_CAPABILITIES: graphics,compute,utility,display,video
+    volumes:
+      - type: bind
+        source: ${LEKIWI_PREFLIGHT_DATA:?}
+        target: /data
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${LEKIWI_PREFLIGHT_DATA:?}/cache/kit
+        target: /isaac-sim/kit/cache
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${LEKIWI_PREFLIGHT_DATA:?}/kit-data
+        target: /isaac-sim/kit/data
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${LEKIWI_PREFLIGHT_DATA:?}/kit-logs
+        target: /isaac-sim/kit/logs
+        bind: {create_host_path: false}
+    stop_grace_period: 30s
